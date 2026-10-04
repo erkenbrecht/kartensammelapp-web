@@ -1,11 +1,11 @@
 {
-    "name": "kartensammelapp",
-    "short_name": "kartensammelapp",
+    "name": "Maxica",
+    "short_name": "Maxica",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Maxica – TCG-Verwaltung: Sammelkarten sammeln, verwalten, tauschen.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
