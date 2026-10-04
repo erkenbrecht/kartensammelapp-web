@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "de.kartensammelapp.kartensammelapp",
+      "sha256_cert_fingerprints": ["75:BD:88:ED:C8:94:31:7E:DE:6B:0B:4A:EC:3F:F8:6F:53:02:E5:80:ED:09:CA:F6:B4:64:C9:4A:60:01:D0:CB"]
+    }
+  }
+]
