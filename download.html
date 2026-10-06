@@ -26,6 +26,8 @@ hr{border:0;border-top:1px solid var(--line);margin:32px 0}
 <p><a class="btn" href="https://github.com/erkenbrecht/kartensammelapp-web/releases/download/android/maxica.apk">App herunterladen (APK)</a></p>
 <p class="meta muted" id="meta">Ab Android 7.0 · für aktuelle Handys (64 Bit)</p>
 
+<div class="box" id="friendbox" hidden><strong>Dein Freundescode: <span id="friendcode"></span></strong><br>Gib ihn bei der Registrierung im Feld „Freundescode“ ein. Dann kannst du dich ohne Einladung anmelden und bist gleich befreundet.</div>
+
 <div class="box">
 <strong>Registrierung nur mit Einladung oder Freundescode.</strong>
 Maxica ist noch in der Testphase. Um dich zu registrieren, brauchst du eine Einladung oder den Freundescode von jemandem, der Maxica schon nutzt. Den Freundescode findest du in der App unter <em>Profil → Freunde</em>. Den Katalog kannst du auch ohne Konto ansehen.
@@ -60,6 +62,11 @@ Maxica ist noch in der Testphase. Um dich zu registrieren, brauchst du eine Einl
 <hr><p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
 </main>
 <script>
+const code = new URLSearchParams(location.search).get('code');
+if (code && /^[A-Za-z0-9-]{4,20}$/.test(code)) {
+  document.getElementById('friendcode').textContent = code.toUpperCase();
+  document.getElementById('friendbox').hidden = false;
+}
 fetch('https://api.github.com/repos/erkenbrecht/kartensammelapp-web/releases/tags/android')
   .then(r => r.ok ? r.json() : null)
   .then(rel => {
