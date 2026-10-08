@@ -18,6 +18,13 @@ a{color:var(--accent)}
 ol li,ul li{margin:6px 0} ol li::marker{color:var(--accent);font-weight:700}
 .meta{font-size:14px}
 hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+form{display:grid;gap:10px;margin-top:12px}
+label{font-size:14px;color:var(--soft)}
+input,textarea{width:100%;box-sizing:border-box;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}
+input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button.btn{border:0;cursor:pointer;justify-self:start}
+button.btn:disabled{opacity:.6;cursor:default}
+#reqmsg{margin:0;font-weight:600;color:var(--fg)}
 </style></head>
 <body><main>
 <a class="banner" href="/"><img src="img/banner.jpg" width="1500" height="563" alt="MaxiCa – Maxi’s Card App: Sammeln, Scannen, Tauschen"></a>
@@ -33,6 +40,19 @@ hr{border:0;border-top:1px solid var(--line);margin:32px 0}
 Maxica ist noch in der Testphase. Um dich zu registrieren, brauchst du eine Einladung oder den Freundescode von jemandem, der Maxica schon nutzt. Den Freundescode findest du in der App unter <em>Profil → Freunde</em>. Den Katalog kannst du auch ohne Konto ansehen.
 </div>
 
+<div class="box" id="request">
+<strong>Kein Code? Einladung anfragen.</strong>
+Trag deine E-Mail-Adresse ein. Sobald du freigeschaltet bist, bekommst du eine Nachricht und kannst dich mit dieser Adresse registrieren.
+<form id="reqform" novalidate>
+<label for="reqemail">E-Mail-Adresse</label>
+<input id="reqemail" name="email" type="email" autocomplete="email" required maxlength="254">
+<label for="reqnote">Was sammelst du? (freiwillig)</label>
+<textarea id="reqnote" name="note" rows="2" maxlength="500"></textarea>
+<button class="btn" type="submit" id="reqbtn">Einladung anfragen</button>
+<p id="reqmsg" role="status" aria-live="polite"></p>
+</form>
+</div>
+
 <h2>Was Maxica kann</h2>
 <ul>
 <li><strong>Über 550 Sammlungen</strong> im Katalog: Fußball (z.&nbsp;B. Match Attax, Panini-Alben ab 2005), weitere Sportarten, Fantasy-Kartenspiele, Kinder- und Filmsammlungen. Eigene Sammlungen kannst du selbst anlegen.</li>
@@ -42,7 +62,7 @@ Maxica ist noch in der Testphase. Um dich zu registrieren, brauchst du eine Einl
 <li><strong>Tauschen:</strong> Maxica schlägt Sammler vor, die deine fehlenden Karten doppelt haben. Tausch mit Nachrichten und Bewertung danach.</li>
 <li><strong>Biete- und Suchlisten</strong> als PDF, Bild oder Tabelle teilen, zum Beispiel für die Tauschbörse auf dem Schulhof.</li>
 <li><strong>Freunde:</strong> per Freundescode verbinden und Sammlungen gegenseitig ansehen.</li>
-<li><strong>Acht Designs</strong> von Ozean bis Lava. Kostenlos, ohne Werbung und ohne Tracking.</li>
+<li><strong>Acht Designs</strong> von Lava bis Ozean. Kostenlos, ohne Werbung und ohne Tracking.</li>
 </ul>
 
 <h2>So installierst du die App</h2>
@@ -67,6 +87,48 @@ if (code && /^[A-Za-z0-9-]{4,20}$/.test(code)) {
   document.getElementById('friendcode').textContent = code.toUpperCase();
   document.getElementById('friendbox').hidden = false;
 }
+// Einladung anfragen: öffentliche Funktion request_invite (Schlüssel setzt scripts/deploy_web.sh ein).
+const SB_URL = 'https://uhaurwvtdqyuresrnhhn.supabase.co';
+const SB_KEY = 'sb_publishable_NHqrHLdjtH5hrQ3mm91_PQ_jAvp45wQ';
+const reqForm = document.getElementById('reqform');
+const reqMsg = document.getElementById('reqmsg');
+reqForm.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const email = document.getElementById('reqemail').value.trim();
+  const note = document.getElementById('reqnote').value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    reqMsg.textContent = 'Bitte eine gültige E-Mail-Adresse eingeben.';
+    return;
+  }
+  const btn = document.getElementById('reqbtn');
+  btn.disabled = true;
+  reqMsg.textContent = 'Wird gesendet …';
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/rpc/request_invite', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', apikey: SB_KEY},
+      body: JSON.stringify({p_email: email, p_note: note || null}),
+    });
+    const body = await r.json().catch(() => null);
+    if (r.ok && body === 'invited') {
+      reqMsg.textContent = 'Du bist schon eingeladen. Lade die App herunter und registriere dich mit dieser Adresse.';
+    } else if (r.ok) {
+      reqMsg.textContent = 'Danke! Deine Anfrage ist angekommen. Du hörst von uns, sobald du freigeschaltet bist.';
+      reqForm.reset();
+    } else if (body && /rate_limited/.test(body.message || '')) {
+      reqMsg.textContent = 'Gerade kommen sehr viele Anfragen. Bitte versuch es später noch einmal.';
+    } else if (body && /invalid_email/.test(body.message || '')) {
+      reqMsg.textContent = 'Bitte eine gültige E-Mail-Adresse eingeben.';
+    } else {
+      reqMsg.textContent = 'Das hat leider nicht geklappt. Bitte versuch es später noch einmal.';
+    }
+  } catch (_) {
+    reqMsg.textContent = 'Keine Verbindung. Bitte versuch es später noch einmal.';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 fetch('https://api.github.com/repos/erkenbrecht/kartensammelapp-web/releases/tags/android')
   .then(r => r.ok ? r.json() : null)
   .then(rel => {
