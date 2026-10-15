@@ -30,7 +30,7 @@ button.btn:disabled{opacity:.6;cursor:default}
 <a class="banner" href="/"><img src="img/banner.jpg" width="1500" height="563" alt="MaxiCa – Maxi’s Card App: Sammeln, Scannen, Tauschen"></a>
 <h1>Maxica für Android</h1>
 <p>Maxica ist deine digitale Sammelmappe für Sammelkarten und Sticker: Du siehst auf einen Blick, welche Karten dir fehlen und welche du doppelt hast, und tauschst mit anderen Sammlern. Hier gibt es immer die neueste Testversion der Android-App, solange Maxica noch nicht im Play Store ist.</p>
-<p><a class="btn" href="https://github.com/erkenbrecht/kartensammelapp-web/releases/download/android/maxica.apk">App herunterladen (APK)</a></p>
+<p><a class="btn" id="apk-link" href="https://github.com/erkenbrecht/kartensammelapp-web/releases/download/android/maxica.apk">App herunterladen (APK)</a></p>
 <p class="meta muted" id="meta">Ab Android 7.0 · für aktuelle Handys (64 Bit)</p>
 
 <div class="box" id="friendbox" hidden><strong>Dein Freundescode: <span id="friendcode"></span></strong><br>Gib ihn bei der Registrierung im Feld „Freundescode“ ein. Dann kannst du dich ohne Einladung anmelden und bist gleich befreundet.</div>
@@ -70,7 +70,7 @@ Trag deine E-Mail-Adresse ein. Sobald du freigeschaltet bist, bekommst du eine N
 <ol>
 <li><strong>Automatische Sperre ausschalten</strong> (nur Samsung): <em>Einstellungen → Sicherheit und Datenschutz → Automatische Sperre</em> → ausschalten.</li>
 <li><strong>Play Protect pausieren:</strong> Play Store öffnen → oben rechts auf dein Profilbild → <em>Play Protect</em> → Zahnrad oben rechts → <em>Apps mit Play Protect scannen</em> ausschalten.</li>
-<li><strong>APK herunterladen</strong> (Knopf oben) und die heruntergeladene Datei <em>maxica.apk</em> antippen.</li>
+<li><strong>APK herunterladen</strong> (Knopf oben) und die heruntergeladene Datei <em>maxica-build-…apk</em> antippen.</li>
 <li>Fragt das Handy, ob der Browser oder „Eigene Dateien“ Apps installieren darf: <em>Einstellungen</em> → <em>Aus dieser Quelle zulassen</em> einschalten, zurück und <em>Installieren</em> tippen.</li>
 <li><strong>Danach Play Protect und die Automatische Sperre wieder einschalten.</strong> Die installierte App läuft trotzdem weiter.</li>
 </ol>
@@ -135,6 +135,9 @@ fetch('https://api.github.com/repos/erkenbrecht/kartensammelapp-web/releases/tag
     if (!rel) return;
     const a = (rel.assets || []).find(x => x.name === 'maxica.apk');
     if (!a) return;
+    // Datei mit Build-Nummer im Namen, damit man sie im Download-Ordner erkennt.
+    const named = (rel.assets || []).find(x => /^maxica-build-\d+\.apk$/.test(x.name));
+    if (named) document.getElementById('apk-link').href = named.browser_download_url;
     const b = (rel.name || '').match(/Build (\d+)/);
     const d = new Date(a.updated_at).toLocaleDateString('de-DE');
     document.getElementById('meta').textContent =
